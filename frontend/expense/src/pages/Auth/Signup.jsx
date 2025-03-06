@@ -1,17 +1,23 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../../components/layout/AuthLayout";
 import { validateEmail, validPassword } from "../../utils/helper";
+import axiosInstance from "../../utils/axiosInstance";
+import { API_PATHS } from "../../utils/apiPaths";
+import { UserContext } from "../../context/UserContext";
+import { Toaster, toast } from "sonner";
 
 const Signup = () => {
-  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
-  const [errors, setErrors] = useState({ name: "", email: "", password: "" });
+  const [formData, setFormData] = useState({ fullName: "", email: "", password: "" });
+  const [errors, setErrors] = useState({ fullName: "", email: "", password: "" });
   const [isLoading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
+  const {updateUser} = useContext(UserContext);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
-  };
+  };  
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -20,8 +26,8 @@ const Signup = () => {
     // Validation checks
     let newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Full Name is required.";
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Full Name is required.";
     }
 
     if (!validateEmail(formData.email)) {
@@ -40,11 +46,30 @@ const Signup = () => {
     }
 
     console.log("Signup Data", formData);
+
+    try {
+      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, formData);
+      const { token, user } = response.data;
+
+      if (token) {
+        localStorage.setItem("token", token);
+        updateUser(user);
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+    }
+
     setLoading(false);
   };
 
   return (
     <AuthLayout>
+        <Toaster position="top-center" richColors /> 
       <div className="w-full max-w-lg mx-auto bg-white p-8 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center mb-4">Create an Account</h2>
         <p className="text-sm text-gray-600 text-center mb-6">Sign up to start tracking your expenses</p>
@@ -55,14 +80,14 @@ const Signup = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
             <input
               type="text"
-              name="name"
+              name="fullName"
               placeholder="Enter your full name"
-              value={formData.name}
+              value={formData.fullName}
               onChange={handleChange}
-              className={`w-full py-1.5 px-3 border rounded-md text-sm focus:outline-none focus:ring-2 ${errors.name ? "border-red-500 focus:ring-red-500" : "focus:ring-purple-500"}`}
+              className={`w-full py-1.5 px-3 border rounded-md text-sm focus:outline-none focus:ring-2 ${errors.fullName ? "border-red-500 focus:ring-red-500" : "focus:ring-purple-500"}`}
               required
             />
-            {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
+            {errors.fullName && <p className="text-xs text-red-500">{errors.fullName}</p>}
           </div>
 
           {/* Email Field */}

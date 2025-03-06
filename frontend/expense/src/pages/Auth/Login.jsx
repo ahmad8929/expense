@@ -1,12 +1,19 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../../components/layout/AuthLayout";
 import { validateEmail, validPassword } from "../../utils/helper";
+import axiosInstance from "../../utils/axiosInstance";
+import {API_PATHS} from "../../utils/apiPaths";
+import { Toaster, toast } from "sonner";
+import { UserContext } from "../../context/UserContext";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [isLoading, setLoading] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
+
+  const {updateUser} = useContext(UserContext);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,16 +45,35 @@ const Login = () => {
     }
 
     console.log("formData", formData);
+
+    try {
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, formData); 
+      const { token, user } = response.data;
+
+      if (token) {
+        localStorage.setItem("token", token);
+        updateUser(user);
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+    }
     setLoading(false);
   };
 
   return (
     <AuthLayout>
+      <Toaster position="top-center" richColors /> 
       <div className="w-full max-w-lg mx-auto bg-white p-8 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center mb-4">Welcome Back</h2>
         <p className="text-sm text-gray-600 text-center mb-6">
           Please enter your details to log in
         </p>
+        {errors.api && <p className="text-center text-sm text-red-500">{errors.api}</p>}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -57,9 +83,8 @@ const Login = () => {
               placeholder="Enter your email"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full py-1.5 px-3 border rounded-md text-sm focus:outline-none focus:ring-2 ${
-                errors.email ? "border-red-500 focus:ring-red-500" : "focus:ring-purple-500"
-              }`}
+              className={`w-full py-1.5 px-3 border rounded-md text-sm focus:outline-none focus:ring-2 ${errors.email ? "border-red-500 focus:ring-red-500" : "focus:ring-purple-500"
+                }`}
               required
             />
             {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
@@ -72,9 +97,8 @@ const Login = () => {
               placeholder="Enter password"
               value={formData.password}
               onChange={handleChange}
-              className={`w-full py-1.5 px-3 border rounded-md text-sm focus:outline-none focus:ring-2 ${
-                errors.password ? "border-red-500 focus:ring-red-500" : "focus:ring-purple-500"
-              }`}
+              className={`w-full py-1.5 px-3 border rounded-md text-sm focus:outline-none focus:ring-2 ${errors.password ? "border-red-500 focus:ring-red-500" : "focus:ring-purple-500"
+                }`}
               required
             />
             {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
