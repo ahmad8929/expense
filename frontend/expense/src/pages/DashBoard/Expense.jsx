@@ -1,9 +1,14 @@
 import React from 'react'
+import DashboardLayout from '../../components/layout/DashboardLayout';
+import { useUserAuth } from '../../hooks/useUserAuth';
 
 const Expense = () => {
+  useUserAuth();
   return (
-    <div>Expense</div>
+    <DashboardLayout activeMenu="Dashboard">
+      <div className='my-5 mx-auto'>Expense</div>
+    </DashboardLayout>
   )
 }
 
-export default Expense
+export default Expense;
