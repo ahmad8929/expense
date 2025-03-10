@@ -30,6 +30,6 @@ export default App;
 
 const Root = () => {
   // Check token exist
-  const isAuthenticated = !!localStorage.getIte("token");
+  const isAuthenticated = !!localStorage.getItem("token");
   return isAuthenticated ? (<Navigate to="/dashboard" />) : (<Navigate to="/login" />)
 }
