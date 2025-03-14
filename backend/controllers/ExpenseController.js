@@ -7,7 +7,7 @@ exports.addExpense = async (req, res) => {
 
     try{
         const {icon, category, amount, date} = req.body;
-
+        console.log("Received Data:", { userId, icon, category, amount, date });
         // validation check
 
         if(!category || !amount || !date){
