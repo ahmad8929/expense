@@ -14,9 +14,9 @@ import {
 const CustomBarChart = ({data}) => {
     // Alternate colors
     const getBarColor = (index) => {
-        return index%2 === 0 ? "#875cf5" : "#cfbefb";
+        return index % 2 === 0 ? "#875cf5" : "#cfbefb";
     };
-
+    
     const CustomToolTip = ({active, payload}) => {
         if (active && payload && payload.length) {
             return (
@@ -46,8 +46,11 @@ const CustomBarChart = ({data}) => {
                         activeDot={{ r: 8, fill: "yellow" }}
                         activeStyle={{ fill: "green" }}
                     >
-                        {data.map((entry, index) => (
+                        {/* {data.map((entry, index) => (
                             <Cell key={index} fill={getBarColor(index)} />
+                        ))} */}
+                        {data.map((entry) => (
+                            <Cell key={entry.id} fill={getBarColor(entry.id)} />
                         ))}
                     </Bar>
                 </BarChart>
