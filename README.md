@@ -1,3 +1,1 @@
-Expense Tracker
-
-Huuuhaaa
+Expense Tracker - Frontend
